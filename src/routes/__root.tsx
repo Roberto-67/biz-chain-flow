@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { SiteNav } from "../components/SiteNav";
 
 function NotFoundComponent() {
   return (
@@ -128,8 +129,12 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <SiteNav />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <footer className="border-t border-border px-6 py-8 text-center text-xs text-muted-foreground">
+        NismoChain — independent concept build. Not affiliated with Nissan or NISMO.
+      </footer>
     </QueryClientProvider>
   );
 }
