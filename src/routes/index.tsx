@@ -1,24 +1,313 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
+import {
+  DELIVERY_FEE,
+  INTERIORS,
+  MODELS,
+  PACKAGES,
+  PAINTS,
+  TAX_RATE,
+  WHEELS,
+  money,
+  type Option,
+} from "@/lib/nismo";
+import { commitOrder, type OrderBlock } from "@/lib/chain";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Build Your Nissan NISMO — Configurator & Blockchain Order Desk" },
+      {
+        name: "description",
+        content:
+          "Configure a Nissan NISMO: pick the model, paint, forged wheels, interior and track packages, then commit the order to a SHA-256 hash-chained ERP ledger.",
+      },
+      { property: "og:title", content: "Build Your Nissan NISMO — Blockchain Order Desk" },
+      {
+        property: "og:description",
+        content:
+          "Pick your NISMO, price every option live, and settle the order into a tamper-evident block.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: Configurator,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function OptionRow({
+  option,
+  selected,
+  onSelect,
+  multi,
+}: {
+  option: Option;
+  selected: boolean;
+  onSelect: () => void;
+  multi?: boolean;
+}) {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
+    <button
+      type="button"
+      onClick={onSelect}
+      className={`flex w-full items-center justify-between gap-4 rounded-md border px-4 py-3 text-left transition-colors ${
+        selected
+          ? "border-primary bg-primary/10"
+          : "border-border bg-background/40 hover:border-muted-foreground/50"
+      }`}
     >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+      <span>
+        <span className="block text-sm font-semibold">{option.label}</span>
+        {option.note ? (
+          <span className="block text-xs text-muted-foreground">{option.note}</span>
+        ) : null}
+      </span>
+      <span className="flex items-center gap-3 whitespace-nowrap text-sm text-muted-foreground">
+        {option.price === 0 ? "Included" : `+ ${money(option.price)}`}
+        <span
+          className={`inline-block h-4 w-4 border ${multi ? "rounded-[3px]" : "rounded-full"} ${
+            selected ? "border-primary bg-primary" : "border-muted-foreground/60"
+          }`}
+        />
+      </span>
+    </button>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="panel p-6">
+      <h2 className="text-sm font-bold uppercase tracking-[0.2em]">{title}</h2>
+      <div className="mt-4 space-y-2">{children}</div>
+    </section>
+  );
+}
+
+function Configurator() {
+  const [modelId, setModelId] = useState(MODELS[0]!.id);
+  const [paint, setPaint] = useState(PAINTS[0]!.id);
+  const [wheel, setWheel] = useState(WHEELS[0]!.id);
+  const [interior, setInterior] = useState(INTERIORS[0]!.id);
+  const [packages, setPackages] = useState<string[]>([]);
+  const [customer, setCustomer] = useState("");
+  const [mining, setMining] = useState(false);
+  const [receipt, setReceipt] = useState<OrderBlock | null>(null);
+
+  const model = MODELS.find((m) => m.id === modelId)!;
+
+  const chosen = useMemo<Option[]>(
+    () => [
+      PAINTS.find((o) => o.id === paint)!,
+      WHEELS.find((o) => o.id === wheel)!,
+      INTERIORS.find((o) => o.id === interior)!,
+      ...PACKAGES.filter((p) => packages.includes(p.id)),
+    ],
+    [paint, wheel, interior, packages],
+  );
+
+  const optionsTotal = chosen.reduce((s, o) => s + o.price, 0);
+  const subtotal = model.base + optionsTotal;
+  const tax = Math.round(subtotal * TAX_RATE);
+  const total = subtotal + tax + DELIVERY_FEE;
+
+  const togglePackage = (id: string) =>
+    setPackages((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
+
+  async function placeOrder() {
+    if (mining) return;
+    setMining(true);
+    setReceipt(null);
+    try {
+      const block = await commitOrder({
+        orderId: `NSM-${Date.now().toString(36).toUpperCase()}`,
+        customer: customer.trim() || "Walk-in client",
+        modelId: model.id,
+        modelName: model.name,
+        options: chosen.map((o) => ({ label: o.label, price: o.price })),
+        subtotal,
+        tax,
+        delivery: DELIVERY_FEE,
+        total,
+      });
+      setReceipt(block);
+    } finally {
+      setMining(false);
+    }
+  }
+
+  return (
+    <main>
+      <section className="relative overflow-hidden border-b border-border">
+        <div className="mx-auto grid max-w-7xl gap-8 px-6 py-12 lg:grid-cols-[1.4fr_1fr] lg:items-center">
+          <div>
+            <p className="eyebrow">Step 01 — Choose your machine</p>
+            <h1 className="mt-3 text-5xl font-extrabold uppercase leading-[0.95]">
+              {model.name}
+            </h1>
+            <p className="mt-3 text-muted-foreground">{model.tagline}</p>
+            <img
+              src={model.image}
+              alt={`${model.name} in studio lighting`}
+              width={1600}
+              height={912}
+              className="mt-6 w-full rounded-lg"
+            />
+            <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+              {[
+                ["Power", model.power],
+                ["0–100 km/h", model.zeroToSixty],
+                ["Top speed", model.topSpeed],
+                ["Drivetrain", model.drivetrain],
+              ].map(([k, v]) => (
+                <div key={k} className="border-l-2 border-primary pl-3">
+                  <p className="eyebrow">{k}</p>
+                  <p className="mt-1 font-display text-lg font-bold">{v}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {MODELS.map((m) => (
+              <button
+                key={m.id}
+                onClick={() => setModelId(m.id)}
+                className={`flex w-full items-center gap-4 rounded-lg border p-3 text-left transition-colors ${
+                  m.id === modelId
+                    ? "border-primary bg-primary/10"
+                    : "border-border bg-card/60 hover:border-muted-foreground/50"
+                }`}
+              >
+                <img
+                  src={m.image}
+                  alt={m.name}
+                  loading="lazy"
+                  width={1600}
+                  height={912}
+                  className="h-16 w-28 rounded object-cover"
+                />
+                <span className="flex-1">
+                  <span className="block font-display text-sm font-bold uppercase tracking-wide">
+                    {m.name}
+                  </span>
+                  <span className="block text-xs text-muted-foreground">From {money(m.base)}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <div className="mx-auto grid max-w-7xl gap-6 px-6 py-12 lg:grid-cols-[1.4fr_1fr] lg:items-start">
+        <div className="space-y-6">
+          <Section title="Step 02 — Exterior paint">
+            {PAINTS.map((o) => (
+              <OptionRow key={o.id} option={o} selected={paint === o.id} onSelect={() => setPaint(o.id)} />
+            ))}
+          </Section>
+          <Section title="Step 03 — Forged wheels">
+            {WHEELS.map((o) => (
+              <OptionRow key={o.id} option={o} selected={wheel === o.id} onSelect={() => setWheel(o.id)} />
+            ))}
+          </Section>
+          <Section title="Step 04 — Interior">
+            {INTERIORS.map((o) => (
+              <OptionRow
+                key={o.id}
+                option={o}
+                selected={interior === o.id}
+                onSelect={() => setInterior(o.id)}
+              />
+            ))}
+          </Section>
+          <Section title="Step 05 — Performance packages">
+            {PACKAGES.map((o) => (
+              <OptionRow
+                key={o.id}
+                option={o}
+                multi
+                selected={packages.includes(o.id)}
+                onSelect={() => togglePackage(o.id)}
+              />
+            ))}
+          </Section>
+        </div>
+
+        <aside className="panel sticky top-24 p-6">
+          <p className="eyebrow">Your build</p>
+          <h2 className="mt-2 text-2xl font-extrabold uppercase">{model.name}</h2>
+
+          <dl className="mt-5 space-y-2 text-sm">
+            <div className="flex justify-between">
+              <dt className="text-muted-foreground">Base vehicle</dt>
+              <dd>{money(model.base)}</dd>
+            </div>
+            {chosen
+              .filter((o) => o.price > 0)
+              .map((o) => (
+                <div key={o.id} className="flex justify-between">
+                  <dt className="text-muted-foreground">{o.label}</dt>
+                  <dd>{money(o.price)}</dd>
+                </div>
+              ))}
+            <div className="flex justify-between border-t border-border pt-2">
+              <dt className="text-muted-foreground">Subtotal</dt>
+              <dd>{money(subtotal)}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-muted-foreground">VAT (12%)</dt>
+              <dd>{money(tax)}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-muted-foreground">Delivery</dt>
+              <dd>{money(DELIVERY_FEE)}</dd>
+            </div>
+          </dl>
+
+          <div className="mt-5 flex items-baseline justify-between border-t border-border pt-4">
+            <span className="eyebrow">Total</span>
+            <span className="font-display text-3xl font-extrabold">{money(total)}</span>
+          </div>
+
+          <label className="mt-5 block">
+            <span className="eyebrow">Client name</span>
+            <input
+              value={customer}
+              onChange={(e) => setCustomer(e.target.value)}
+              placeholder="e.g. R. Alejandro"
+              className="mt-2 w-full rounded-md border border-input bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary"
+            />
+          </label>
+
+          <button
+            onClick={placeOrder}
+            disabled={mining}
+            className="mt-4 w-full rounded-md bg-primary px-4 py-3 font-display text-sm font-bold uppercase tracking-[0.2em] text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+          >
+            {mining ? "Mining block…" : "Place order & mine block"}
+          </button>
+
+          {receipt && (
+            <div className="mt-5 rounded-md border border-success/40 bg-success/10 p-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-success">
+                Block #{receipt.index} committed
+              </p>
+              <p className="mt-2 hash-text text-foreground">{receipt.hash}</p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Nonce {receipt.nonce.toLocaleString()} · {receipt.orderId}
+              </p>
+              <div className="mt-3 flex gap-4 text-xs font-semibold uppercase tracking-widest">
+                <Link to="/erp" className="text-primary">
+                  View income →
+                </Link>
+                <Link to="/ledger" className="text-primary">
+                  View ledger →
+                </Link>
+              </div>
+            </div>
+          )}
+        </aside>
+      </div>
+    </main>
   );
 }
