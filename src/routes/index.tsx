@@ -295,6 +295,53 @@ function Configurator() {
               />
             ))}
           </Section>
+
+          <Section title="Step 06 — Delivery location">
+            <p className="text-sm text-muted-foreground">
+              Enter where the car should be sent. We check it against our {SERVICE_RADIUS_KM} km
+              delivery zone around {SHOWROOM.name}.
+            </p>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <input
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") void locate();
+                }}
+                placeholder="e.g. 123 Ayala Ave, Makati, Metro Manila"
+                className="flex-1 rounded-md border border-input bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary"
+              />
+              <button
+                type="button"
+                onClick={() => void locate()}
+                disabled={checking || address.trim().length < 3}
+                className="rounded-md border border-primary px-4 py-2 font-display text-xs font-bold uppercase tracking-[0.2em] text-primary disabled:opacity-50"
+              >
+                {checking ? "Checking…" : "Check address"}
+              </button>
+            </div>
+
+            {error && <p className="text-sm text-destructive">{error}</p>}
+
+            {quote && (
+              <div
+                className={`rounded-md border p-4 ${
+                  quote.available ? "border-success/40 bg-success/10" : "border-destructive/40 bg-destructive/10"
+                }`}
+              >
+                <p className="text-sm font-semibold">{quote.formattedAddress}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{quote.message}</p>
+                {mapsKey && (
+                  <iframe
+                    title="Delivery location map"
+                    loading="lazy"
+                    className="mt-3 h-64 w-full rounded-md border border-border"
+                    src={`https://www.google.com/maps/embed/v1/view?key=${mapsKey}&center=${quote.lat},${quote.lng}&zoom=13`}
+                  />
+                )}
+              </div>
+            )}
+          </Section>
         </div>
 
         <aside className="panel sticky top-24 p-6">
