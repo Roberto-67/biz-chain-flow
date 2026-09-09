@@ -434,6 +434,12 @@ function Configurator() {
               <p className="mt-2 text-xs text-muted-foreground">
                 Nonce {receipt.nonce.toLocaleString()} · {receipt.orderId}
               </p>
+              {receipt.deliveryAddress && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Shipping to {receipt.deliveryAddress}
+                </p>
+              )}
+              {emailStatus && <p className="mt-2 text-xs text-foreground">{emailStatus}</p>}
               <div className="mt-3 flex gap-4 text-xs font-semibold uppercase tracking-widest">
                 <Link to="/erp" className="text-primary">
                   View income →
