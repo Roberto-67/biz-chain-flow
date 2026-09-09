@@ -145,8 +145,14 @@ function Configurator() {
 
   async function placeOrder() {
     if (mining) return;
+    if (!quote?.available) {
+      setError("Confirm a delivery location inside the service zone first.");
+      return;
+    }
     setMining(true);
     setReceipt(null);
+    setError(null);
+    setEmailStatus(null);
     try {
       const block = await commitOrder({
         orderId: `NSM-${Date.now().toString(36).toUpperCase()}`,
@@ -158,8 +164,36 @@ function Configurator() {
         tax,
         delivery: DELIVERY_FEE,
         total,
+        deliveryAddress: quote.formattedAddress,
+        deliveryLat: quote.lat,
+        deliveryLng: quote.lng,
+        deliveryEtaDays: quote.etaDays,
+        email: email.trim() || undefined,
       });
       setReceipt(block);
+
+      if (email.trim()) {
+        setEmailStatus("Sending confirmation…");
+        try {
+          await runSendEmail({
+            data: {
+              to: email.trim(),
+              customer: customer.trim() || "there",
+              orderId: block.orderId,
+              modelName: block.modelName,
+              options: block.options,
+              total: block.total,
+              hash: block.hash,
+              blockIndex: block.index,
+              deliveryAddress: quote.formattedAddress,
+              etaDays: quote.etaDays,
+            },
+          });
+          setEmailStatus(`Confirmation sent to ${email.trim()}`);
+        } catch (e) {
+          setEmailStatus(e instanceof Error ? e.message : "Confirmation email failed.");
+        }
+      }
     } finally {
       setMining(false);
     }
