@@ -15,6 +15,11 @@ export type OrderBlock = {
   nonce: number;
   previousHash: string;
   hash: string;
+  deliveryAddress?: string;
+  deliveryLat?: number;
+  deliveryLng?: number;
+  deliveryEtaDays?: number;
+  email?: string;
 };
 
 const STORAGE_KEY = "nismo-erp-chain-v1";

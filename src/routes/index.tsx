@@ -12,6 +12,14 @@ import {
   type Option,
 } from "@/lib/nismo";
 import { commitOrder, type OrderBlock } from "@/lib/chain";
+import { useServerFn } from "@tanstack/react-start";
+import {
+  checkDelivery,
+  SERVICE_RADIUS_KM,
+  SHOWROOM,
+  type DeliveryQuote,
+} from "@/lib/delivery.functions";
+import { sendOrderConfirmation } from "@/lib/order-email.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -92,6 +100,33 @@ function Configurator() {
   const [customer, setCustomer] = useState("");
   const [mining, setMining] = useState(false);
   const [receipt, setReceipt] = useState<OrderBlock | null>(null);
+  const [address, setAddress] = useState("");
+  const [email, setEmail] = useState("");
+  const [quote, setQuote] = useState<DeliveryQuote | null>(null);
+  const [checking, setChecking] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [emailStatus, setEmailStatus] = useState<string | null>(null);
+
+  const runCheckDelivery = useServerFn(checkDelivery);
+  const runSendEmail = useServerFn(sendOrderConfirmation);
+
+  const mapsKey = import.meta.env["VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY"] as
+    | string
+    | undefined;
+
+  async function locate() {
+    if (checking) return;
+    setChecking(true);
+    setError(null);
+    setQuote(null);
+    try {
+      setQuote(await runCheckDelivery({ data: { address } }));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Address lookup failed.");
+    } finally {
+      setChecking(false);
+    }
+  }
 
   const model = MODELS.find((m) => m.id === modelId)!;
 
@@ -115,8 +150,14 @@ function Configurator() {
 
   async function placeOrder() {
     if (mining) return;
+    if (!quote?.available) {
+      setError("Confirm a delivery location inside the service zone first.");
+      return;
+    }
     setMining(true);
     setReceipt(null);
+    setError(null);
+    setEmailStatus(null);
     try {
       const block = await commitOrder({
         orderId: `NSM-${Date.now().toString(36).toUpperCase()}`,
@@ -128,8 +169,36 @@ function Configurator() {
         tax,
         delivery: DELIVERY_FEE,
         total,
+        deliveryAddress: quote.formattedAddress,
+        deliveryLat: quote.lat,
+        deliveryLng: quote.lng,
+        deliveryEtaDays: quote.etaDays,
+        ...(email.trim() ? { email: email.trim() } : {}),
       });
       setReceipt(block);
+
+      if (email.trim()) {
+        setEmailStatus("Sending confirmation…");
+        try {
+          await runSendEmail({
+            data: {
+              to: email.trim(),
+              customer: customer.trim() || "there",
+              orderId: block.orderId,
+              modelName: block.modelName,
+              options: block.options,
+              total: block.total,
+              hash: block.hash,
+              blockIndex: block.index,
+              deliveryAddress: quote.formattedAddress,
+              etaDays: quote.etaDays,
+            },
+          });
+          setEmailStatus(`Confirmation sent to ${email.trim()}`);
+        } catch (e) {
+          setEmailStatus(e instanceof Error ? e.message : "Confirmation email failed.");
+        }
+      }
     } finally {
       setMining(false);
     }
@@ -231,6 +300,53 @@ function Configurator() {
               />
             ))}
           </Section>
+
+          <Section title="Step 06 — Delivery location">
+            <p className="text-sm text-muted-foreground">
+              Enter where the car should be sent. We check it against our {SERVICE_RADIUS_KM} km
+              delivery zone around {SHOWROOM.name}.
+            </p>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <input
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") void locate();
+                }}
+                placeholder="e.g. 123 Ayala Ave, Makati, Metro Manila"
+                className="flex-1 rounded-md border border-input bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary"
+              />
+              <button
+                type="button"
+                onClick={() => void locate()}
+                disabled={checking || address.trim().length < 3}
+                className="rounded-md border border-primary px-4 py-2 font-display text-xs font-bold uppercase tracking-[0.2em] text-primary disabled:opacity-50"
+              >
+                {checking ? "Checking…" : "Check address"}
+              </button>
+            </div>
+
+            {error && <p className="text-sm text-destructive">{error}</p>}
+
+            {quote && (
+              <div
+                className={`rounded-md border p-4 ${
+                  quote.available ? "border-success/40 bg-success/10" : "border-destructive/40 bg-destructive/10"
+                }`}
+              >
+                <p className="text-sm font-semibold">{quote.formattedAddress}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{quote.message}</p>
+                {mapsKey && (
+                  <iframe
+                    title="Delivery location map"
+                    loading="lazy"
+                    className="mt-3 h-64 w-full rounded-md border border-border"
+                    src={`https://www.google.com/maps/embed/v1/view?key=${mapsKey}&center=${quote.lat},${quote.lng}&zoom=13`}
+                  />
+                )}
+              </div>
+            )}
+          </Section>
         </div>
 
         <aside className="panel sticky top-24 p-6">
@@ -279,9 +395,31 @@ function Configurator() {
             />
           </label>
 
+          <label className="mt-4 block">
+            <span className="eyebrow">Email for confirmation</span>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="buyer@email.com"
+              className="mt-2 w-full rounded-md border border-input bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary"
+            />
+          </label>
+
+          <div className="mt-4 rounded-md border border-border bg-background/40 p-3 text-xs">
+            <p className="eyebrow">Delivery</p>
+            <p className="mt-1 text-muted-foreground">
+              {quote
+                ? quote.available
+                  ? `${quote.formattedAddress} · ~${quote.etaDays} days`
+                  : `${quote.formattedAddress} · outside delivery zone`
+                : "Check a delivery address in Step 06 to continue."}
+            </p>
+          </div>
+
           <button
             onClick={placeOrder}
-            disabled={mining}
+            disabled={mining || !quote?.available}
             className="mt-4 w-full rounded-md bg-primary px-4 py-3 font-display text-sm font-bold uppercase tracking-[0.2em] text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
           >
             {mining ? "Mining block…" : "Place order & mine block"}
@@ -296,6 +434,12 @@ function Configurator() {
               <p className="mt-2 text-xs text-muted-foreground">
                 Nonce {receipt.nonce.toLocaleString()} · {receipt.orderId}
               </p>
+              {receipt.deliveryAddress && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Shipping to {receipt.deliveryAddress}
+                </p>
+              )}
+              {emailStatus && <p className="mt-2 text-xs text-foreground">{emailStatus}</p>}
               <div className="mt-3 flex gap-4 text-xs font-semibold uppercase tracking-widest">
                 <Link to="/erp" className="text-primary">
                   View income →
