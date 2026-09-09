@@ -395,9 +395,31 @@ function Configurator() {
             />
           </label>
 
+          <label className="mt-4 block">
+            <span className="eyebrow">Email for confirmation</span>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="buyer@email.com"
+              className="mt-2 w-full rounded-md border border-input bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary"
+            />
+          </label>
+
+          <div className="mt-4 rounded-md border border-border bg-background/40 p-3 text-xs">
+            <p className="eyebrow">Delivery</p>
+            <p className="mt-1 text-muted-foreground">
+              {quote
+                ? quote.available
+                  ? `${quote.formattedAddress} · ~${quote.etaDays} days`
+                  : `${quote.formattedAddress} · outside delivery zone`
+                : "Check a delivery address in Step 06 to continue."}
+            </p>
+          </div>
+
           <button
             onClick={placeOrder}
-            disabled={mining}
+            disabled={mining || !quote?.available}
             className="mt-4 w-full rounded-md bg-primary px-4 py-3 font-display text-sm font-bold uppercase tracking-[0.2em] text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
           >
             {mining ? "Mining block…" : "Place order & mine block"}
