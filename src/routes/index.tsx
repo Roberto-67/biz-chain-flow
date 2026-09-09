@@ -12,6 +12,9 @@ import {
   type Option,
 } from "@/lib/nismo";
 import { commitOrder, type OrderBlock } from "@/lib/chain";
+import { useServerFn } from "@tanstack/react-start";
+import { checkDelivery, type DeliveryQuote } from "@/lib/delivery.functions";
+import { sendOrderConfirmation } from "@/lib/order-email.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -92,6 +95,33 @@ function Configurator() {
   const [customer, setCustomer] = useState("");
   const [mining, setMining] = useState(false);
   const [receipt, setReceipt] = useState<OrderBlock | null>(null);
+  const [address, setAddress] = useState("");
+  const [email, setEmail] = useState("");
+  const [quote, setQuote] = useState<DeliveryQuote | null>(null);
+  const [checking, setChecking] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [emailStatus, setEmailStatus] = useState<string | null>(null);
+
+  const runCheckDelivery = useServerFn(checkDelivery);
+  const runSendEmail = useServerFn(sendOrderConfirmation);
+
+  const mapsKey = import.meta.env["VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY"] as
+    | string
+    | undefined;
+
+  async function locate() {
+    if (checking) return;
+    setChecking(true);
+    setError(null);
+    setQuote(null);
+    try {
+      setQuote(await runCheckDelivery({ data: { address } }));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Address lookup failed.");
+    } finally {
+      setChecking(false);
+    }
+  }
 
   const model = MODELS.find((m) => m.id === modelId)!;
 
