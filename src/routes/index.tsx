@@ -13,7 +13,12 @@ import {
 } from "@/lib/nismo";
 import { commitOrder, type OrderBlock } from "@/lib/chain";
 import { useServerFn } from "@tanstack/react-start";
-import { checkDelivery, type DeliveryQuote } from "@/lib/delivery.functions";
+import {
+  checkDelivery,
+  SERVICE_RADIUS_KM,
+  SHOWROOM,
+  type DeliveryQuote,
+} from "@/lib/delivery.functions";
 import { sendOrderConfirmation } from "@/lib/order-email.functions";
 
 export const Route = createFileRoute("/")({
