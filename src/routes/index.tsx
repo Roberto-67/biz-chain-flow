@@ -173,7 +173,7 @@ function Configurator() {
         deliveryLat: quote.lat,
         deliveryLng: quote.lng,
         deliveryEtaDays: quote.etaDays,
-        email: email.trim() || undefined,
+        ...(email.trim() ? { email: email.trim() } : {}),
       });
       setReceipt(block);
 
