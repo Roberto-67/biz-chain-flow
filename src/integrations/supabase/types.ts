@@ -14,7 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      orders: {
+        Row: {
+          block_index: number
+          block_timestamp: number
+          created_at: string
+          customer: string
+          delivery: number
+          delivery_address: string | null
+          delivery_eta_days: number | null
+          delivery_lat: number | null
+          delivery_lng: number | null
+          email: string | null
+          hash: string
+          id: string
+          model_id: string
+          model_name: string
+          nonce: number
+          options: Json
+          order_id: string
+          previous_hash: string
+          subtotal: number
+          tax: number
+          total: number
+        }
+        Insert: {
+          block_index: number
+          block_timestamp: number
+          created_at?: string
+          customer: string
+          delivery?: number
+          delivery_address?: string | null
+          delivery_eta_days?: number | null
+          delivery_lat?: number | null
+          delivery_lng?: number | null
+          email?: string | null
+          hash: string
+          id?: string
+          model_id: string
+          model_name: string
+          nonce: number
+          options?: Json
+          order_id: string
+          previous_hash: string
+          subtotal?: number
+          tax?: number
+          total?: number
+        }
+        Update: {
+          block_index?: number
+          block_timestamp?: number
+          created_at?: string
+          customer?: string
+          delivery?: number
+          delivery_address?: string | null
+          delivery_eta_days?: number | null
+          delivery_lat?: number | null
+          delivery_lng?: number | null
+          email?: string | null
+          hash?: string
+          id?: string
+          model_id?: string
+          model_name?: string
+          nonce?: number
+          options?: Json
+          order_id?: string
+          previous_hash?: string
+          subtotal?: number
+          tax?: number
+          total?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
