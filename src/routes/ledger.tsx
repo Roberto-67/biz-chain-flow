@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { CHAIN_DIFFICULTY, GENESIS, resetChain, tamperBlock, useChain, verifyChain } from "@/lib/chain";
+import { CHAIN_DIFFICULTY, GENESIS, refreshChain, tamperBlock, useChain, verifyChain } from "@/lib/chain";
 import { money } from "@/lib/nismo";
 
 export const Route = createFileRoute("/ledger")({
@@ -65,14 +65,13 @@ function LedgerPage() {
           {checking ? "Verifying…" : broken ? `${broken} invalid block(s)` : "Chain valid"}
         </span>
         <span className="text-xs text-muted-foreground">{chain.length} blocks</span>
-        {chain.length > 0 && (
-          <button
-            onClick={() => resetChain()}
-            className="ml-auto rounded-md border border-border px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Reset chain
-          </button>
-        )}
+        <button
+          onClick={() => void refreshChain()}
+          className="ml-auto rounded-md border border-border px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Refresh from database
+        </button>
+
       </div>
 
       <div className="mt-8 space-y-4">

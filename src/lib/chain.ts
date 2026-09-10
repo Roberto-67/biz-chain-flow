@@ -1,4 +1,6 @@
 import { useSyncExternalStore } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
 
 export type OrderBlock = {
   index: number;
@@ -76,35 +78,82 @@ export async function verifyChain(chain: OrderBlock[]) {
   return results;
 }
 
-/* ---------------- store ---------------- */
+/* ---------------- store (backed by the database) ---------------- */
 
 let chain: OrderBlock[] = [];
 let loaded = false;
 const listeners = new Set<() => void>();
 
 function emit() {
-  listeners.add;
   for (const l of listeners) l();
+}
+
+type OrderRow = {
+  block_index: number;
+  order_id: string;
+  customer: string;
+  email: string | null;
+  model_id: string;
+  model_name: string;
+  options: { label: string; price: number }[];
+  subtotal: number;
+  tax: number;
+  delivery: number;
+  total: number;
+  delivery_address: string | null;
+  delivery_lat: number | null;
+  delivery_lng: number | null;
+  delivery_eta_days: number | null;
+  block_timestamp: number;
+  nonce: number;
+  previous_hash: string;
+  hash: string;
+};
+
+function rowToBlock(r: OrderRow): OrderBlock {
+  return {
+    index: r.block_index,
+    timestamp: Number(r.block_timestamp),
+    orderId: r.order_id,
+    customer: r.customer,
+    modelId: r.model_id,
+    modelName: r.model_name,
+    options: (r.options ?? []) as { label: string; price: number }[],
+    subtotal: r.subtotal,
+    tax: r.tax,
+    delivery: r.delivery,
+    total: r.total,
+    nonce: r.nonce,
+    previousHash: r.previous_hash,
+    hash: r.hash,
+    ...(r.delivery_address ? { deliveryAddress: r.delivery_address } : {}),
+    ...(r.delivery_lat != null ? { deliveryLat: r.delivery_lat } : {}),
+    ...(r.delivery_lng != null ? { deliveryLng: r.delivery_lng } : {}),
+    ...(r.delivery_eta_days != null ? { deliveryEtaDays: r.delivery_eta_days } : {}),
+    ...(r.email ? { email: r.email } : {}),
+  };
+}
+
+export async function refreshChain(): Promise<void> {
+  if (typeof window === "undefined") return;
+  const { data, error } = await supabase
+    .from("orders")
+    .select("*")
+    .order("block_index", { ascending: true });
+  if (error) throw error;
+  chain = ((data ?? []) as unknown as OrderRow[]).map(rowToBlock);
+  emit();
 }
 
 function load() {
   if (loaded || typeof window === "undefined") return;
   loaded = true;
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) chain = JSON.parse(raw) as OrderBlock[];
-  } catch {
-    chain = [];
-  }
-}
-
-function persist() {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(chain));
+  void refreshChain().catch(() => {
+    /* offline / unreachable database — keep the empty chain */
+  });
 }
 
 export function getLastHash(): string {
-  load();
   return chain.length ? chain[chain.length - 1]!.hash : GENESIS_HASH;
 }
 
@@ -112,28 +161,45 @@ export async function commitOrder(
   input: Omit<OrderBlock, "hash" | "nonce" | "index" | "previousHash" | "timestamp">,
 ): Promise<OrderBlock> {
   load();
+  await refreshChain();
+
   const block = await mineBlock({
     ...input,
     index: chain.length,
     timestamp: Date.now(),
     previousHash: getLastHash(),
   });
-  chain = [...chain, block];
-  persist();
-  emit();
+
+  const { error } = await supabase.from("orders").insert({
+    block_index: block.index,
+    order_id: block.orderId,
+    customer: block.customer,
+    email: block.email ?? null,
+    model_id: block.modelId,
+    model_name: block.modelName,
+    options: block.options,
+    subtotal: block.subtotal,
+    tax: block.tax,
+    delivery: block.delivery,
+    total: block.total,
+    delivery_address: block.deliveryAddress ?? null,
+    delivery_lat: block.deliveryLat ?? null,
+    delivery_lng: block.deliveryLng ?? null,
+    delivery_eta_days: block.deliveryEtaDays ?? null,
+    block_timestamp: block.timestamp,
+    nonce: block.nonce,
+    previous_hash: block.previousHash,
+    hash: block.hash,
+  });
+  if (error) throw new Error(`Could not save the order: ${error.message}`);
+
+  await refreshChain();
   return block;
 }
 
+/** Local-only demo: alters a block in memory so verification fails. Reload to restore. */
 export function tamperBlock(index: number, newTotal: number) {
-  load();
   chain = chain.map((b) => (b.index === index ? { ...b, total: newTotal } : b));
-  persist();
-  emit();
-}
-
-export function resetChain() {
-  chain = [];
-  persist();
   emit();
 }
 
@@ -148,13 +214,11 @@ const EMPTY: OrderBlock[] = [];
 export function useChain(): OrderBlock[] {
   return useSyncExternalStore(
     subscribe,
-    () => {
-      load();
-      return chain;
-    },
+    () => chain,
     () => EMPTY,
   );
 }
 
 export const GENESIS = GENESIS_HASH;
 export const CHAIN_DIFFICULTY = DIFFICULTY;
+
