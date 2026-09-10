@@ -199,6 +199,8 @@ function Configurator() {
           setEmailStatus(e instanceof Error ? e.message : "Confirmation email failed.");
         }
       }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not save the order. Please try again.");
     } finally {
       setMining(false);
     }
