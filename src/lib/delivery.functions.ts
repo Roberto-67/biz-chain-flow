@@ -4,7 +4,8 @@ const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_maps";
 
 // Showroom origin: NISMO Manila delivery hub.
 export const SHOWROOM = { name: "NISMO Manila Delivery Hub", lat: 14.5995, lng: 120.9842 };
-export const SERVICE_RADIUS_KM = 700;
+// Nationwide delivery: anywhere in the Philippines.
+export const SERVICE_AREA = "the Philippines";
 
 function haversineKm(aLat: number, aLng: number, bLat: number, bLng: number) {
   const R = 6371;
