@@ -427,6 +427,17 @@ function Configurator() {
             {mining ? "Mining block…" : "Place order & mine block"}
           </button>
 
+          {!quote?.available && !mining && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              {quote
+                ? "That address is outside the delivery zone — try another one in Step 06."
+                : "Enter your delivery address in Step 06 and tap “Check address” to unlock ordering."}
+            </p>
+          )}
+
+          {error && <p className="mt-2 text-xs text-destructive">{error}</p>}
+
+
           {receipt && (
             <div className="mt-5 rounded-md border border-success/40 bg-success/10 p-4">
               <p className="text-xs font-semibold uppercase tracking-widest text-success">
