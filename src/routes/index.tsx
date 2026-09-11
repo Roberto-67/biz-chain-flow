@@ -346,14 +346,25 @@ function Configurator() {
                     src={`https://www.google.com/maps/embed/v1/view?key=${mapsKey}&center=${quote.lat},${quote.lng}&zoom=13`}
                   />
                 )}
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${quote.lat},${quote.lng}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = `https://www.google.com/maps/search/?api=1&query=${quote.lat},${quote.lng}`;
+                    const win = window.open(url, "_blank", "noopener,noreferrer");
+                    if (!win) {
+                      // Preview frames can block new tabs — navigate the top window instead.
+                      try {
+                        (window.top ?? window).location.href = url;
+                      } catch {
+                        window.location.href = url;
+                      }
+                    }
+                  }}
                   className="mt-3 inline-block rounded-md border border-primary px-4 py-2 font-display text-xs font-bold uppercase tracking-[0.2em] text-primary"
                 >
                   Open in Google Maps
-                </a>
+                </button>
+
               </div>
             )}
           </Section>
