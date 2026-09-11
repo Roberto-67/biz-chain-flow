@@ -79,8 +79,26 @@ function LedgerPage() {
         >
           Refresh from database
         </button>
-
+        <button
+          onClick={() => {
+            if (clearing || chain.length === 0) return;
+            if (!window.confirm("Delete every order block permanently? This cannot be undone.")) return;
+            setClearing(true);
+            setClearError(null);
+            clearChain()
+              .catch((e: unknown) =>
+                setClearError(e instanceof Error ? e.message : "Could not clear the ledger."),
+              )
+              .finally(() => setClearing(false));
+          }}
+          disabled={clearing || chain.length === 0}
+          className="rounded-md border border-destructive/60 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-destructive transition-opacity hover:opacity-80 disabled:opacity-40"
+        >
+          {clearing ? "Clearing…" : "Clear database"}
+        </button>
       </div>
+
+      {clearError && <p className="mt-3 text-sm text-destructive">{clearError}</p>}
 
       <div className="mt-8 space-y-4">
         {chain.length === 0 && (
