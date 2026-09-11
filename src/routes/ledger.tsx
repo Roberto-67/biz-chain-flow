@@ -1,6 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { CHAIN_DIFFICULTY, GENESIS, refreshChain, tamperBlock, useChain, verifyChain } from "@/lib/chain";
+import {
+  CHAIN_DIFFICULTY,
+  GENESIS,
+  clearChain,
+  refreshChain,
+  tamperBlock,
+  useChain,
+  verifyChain,
+} from "@/lib/chain";
 import { money } from "@/lib/nismo";
 
 export const Route = createFileRoute("/ledger")({
