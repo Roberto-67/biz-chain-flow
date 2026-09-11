@@ -78,7 +78,8 @@ export const checkDelivery = createServerFn({ method: "POST" })
 
     const { lat, lng } = first.geometry.location;
     const distanceKm = Math.round(haversineKm(SHOWROOM.lat, SHOWROOM.lng, lat, lng));
-    const available = distanceKm <= SERVICE_RADIUS_KM;
+    const inCountry = /philippines/i.test(first.formatted_address);
+    const available = inCountry;
     const etaDays = available ? Math.max(3, Math.ceil(distanceKm / 180) + 2) : 0;
 
     return {
