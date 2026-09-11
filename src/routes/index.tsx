@@ -15,7 +15,7 @@ import { commitOrder, type OrderBlock } from "@/lib/chain";
 import { useServerFn } from "@tanstack/react-start";
 import {
   checkDelivery,
-  SERVICE_RADIUS_KM,
+  SERVICE_AREA,
   SHOWROOM,
   type DeliveryQuote,
 } from "@/lib/delivery.functions";
@@ -305,8 +305,8 @@ function Configurator() {
 
           <Section title="Step 06 — Delivery location">
             <p className="text-sm text-muted-foreground">
-              Enter where the car should be sent. We check it against our {SERVICE_RADIUS_KM} km
-              delivery zone around {SHOWROOM.name}.
+              Enter where the car should be sent. We deliver anywhere in {SERVICE_AREA}, shipped
+              from {SHOWROOM.name}.
             </p>
             <div className="flex flex-col gap-2 sm:flex-row">
               <input

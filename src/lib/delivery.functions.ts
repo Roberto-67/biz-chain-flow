@@ -91,6 +91,6 @@ export const checkDelivery = createServerFn({ method: "POST" })
       etaDays,
       message: available
         ? `Delivery available — ${distanceKm} km from ${SHOWROOM.name}, arriving in about ${etaDays} days.`
-        : `Outside our ${SERVICE_RADIUS_KM} km delivery zone (${distanceKm} km away). Our team will arrange a freight quote.`,
+        : `We deliver nationwide within ${SERVICE_AREA}. That address appears to be outside the country — our team will arrange an export quote.`,
     };
   });
