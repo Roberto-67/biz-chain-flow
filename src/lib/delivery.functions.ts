@@ -78,7 +78,8 @@ export const checkDelivery = createServerFn({ method: "POST" })
 
     const { lat, lng } = first.geometry.location;
     const distanceKm = Math.round(haversineKm(SHOWROOM.lat, SHOWROOM.lng, lat, lng));
-    const available = distanceKm <= SERVICE_RADIUS_KM;
+    const inCountry = /philippines/i.test(first.formatted_address);
+    const available = inCountry;
     const etaDays = available ? Math.max(3, Math.ceil(distanceKm / 180) + 2) : 0;
 
     return {
@@ -90,6 +91,6 @@ export const checkDelivery = createServerFn({ method: "POST" })
       etaDays,
       message: available
         ? `Delivery available — ${distanceKm} km from ${SHOWROOM.name}, arriving in about ${etaDays} days.`
-        : `Outside our ${SERVICE_RADIUS_KM} km delivery zone (${distanceKm} km away). Our team will arrange a freight quote.`,
+        : `We deliver nationwide within ${SERVICE_AREA}. That address appears to be outside the country — our team will arrange an export quote.`,
     };
   });
