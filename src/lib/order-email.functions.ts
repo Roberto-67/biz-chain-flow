@@ -49,7 +49,8 @@ export const sendOrderConfirmation = createServerFn({ method: "POST" })
     const html = `<!doctype html><html><body style="background:#ffffff;font-family:Arial,sans-serif;color:#111">
 <div style="max-width:600px;margin:0 auto;padding:24px">
 <p style="letter-spacing:.2em;font-size:11px;color:#c3002f;font-weight:bold;margin:0">NISMO ORDER DESK</p>
-<h1 style="font-size:24px;margin:8px 0 4px">Your ${esc(data.modelName)} is confirmed</h1>
+<h1 style="font-size:24px;margin:8px 0 4px">Order is confirmed</h1>
+<p style="color:#111;font-size:15px;margin:0">Your ${esc(data.modelName)} order is confirmed.</p>
 <p style="color:#555">Hi ${esc(data.customer)}, your order <strong>${esc(data.orderId)}</strong> has been recorded and is being prepared.</p>
 <table width="100%" style="border-collapse:collapse;font-size:14px;margin-top:16px">${rows}
 <tr><td style="padding:10px 0;border-top:1px solid #eee"><strong>Total</strong></td><td align="right" style="padding:10px 0;border-top:1px solid #eee"><strong>${money(
