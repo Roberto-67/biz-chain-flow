@@ -346,6 +346,14 @@ function Configurator() {
                     src={`https://www.google.com/maps/embed/v1/view?key=${mapsKey}&center=${quote.lat},${quote.lng}&zoom=13`}
                   />
                 )}
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${quote.lat},${quote.lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-block rounded-md border border-primary px-4 py-2 font-display text-xs font-bold uppercase tracking-[0.2em] text-primary"
+                >
+                  Open in Google Maps
+                </a>
               </div>
             )}
           </Section>

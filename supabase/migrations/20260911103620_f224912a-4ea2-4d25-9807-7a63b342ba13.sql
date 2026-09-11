@@ -1,0 +1,1 @@
+CREATE POLICY "Anyone can clear orders" ON public.orders FOR DELETE TO anon, authenticated USING (true);

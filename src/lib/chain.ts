@@ -197,6 +197,13 @@ export async function commitOrder(
   return block;
 }
 
+/** Permanently removes every stored order block from the database. */
+export async function clearChain(): Promise<void> {
+  const { error } = await supabase.from("orders").delete().gte("block_index", 0);
+  if (error) throw new Error(`Could not clear the ledger: ${error.message}`);
+  await refreshChain();
+}
+
 /** Local-only demo: alters a block in memory so verification fails. Reload to restore. */
 export function tamperBlock(index: number, newTotal: number) {
   chain = chain.map((b) => (b.index === index ? { ...b, total: newTotal } : b));
