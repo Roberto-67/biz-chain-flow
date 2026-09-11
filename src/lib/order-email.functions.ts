@@ -63,7 +63,7 @@ Estimated arrival in about ${data.etaDays} days.</p>
 
     const message = [
       `To: ${data.to}`,
-      `Subject: ${header(`Order ${data.orderId} confirmed — ${data.modelName}`)}`,
+      `Subject: ${header(`Order is confirmed — ${data.modelName} (${data.orderId})`)}`,
       "MIME-Version: 1.0",
       'Content-Type: text/html; charset="UTF-8"',
       "",
