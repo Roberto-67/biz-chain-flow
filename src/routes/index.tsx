@@ -414,7 +414,7 @@ function Configurator() {
               {quote
                 ? quote.available
                   ? `${quote.formattedAddress} · ~${quote.etaDays} days`
-                  : `${quote.formattedAddress} · outside delivery zone`
+                  : `${quote.formattedAddress} · outside the Philippines`
                 : "Check a delivery address in Step 06 to continue."}
             </p>
           </div>
@@ -430,7 +430,7 @@ function Configurator() {
           {!quote?.available && !mining && (
             <p className="mt-2 text-xs text-muted-foreground">
               {quote
-                ? "That address is outside the delivery zone — try another one in Step 06."
+                ? "That address isn't in the Philippines — try a local address in Step 06."
                 : "Enter your delivery address in Step 06 and tap “Check address” to unlock ordering."}
             </p>
           )}
