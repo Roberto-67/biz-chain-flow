@@ -36,6 +36,8 @@ function LedgerPage() {
   const chain = useChain();
   const [results, setResults] = useState<{ index: number; valid: boolean; reason?: string }[]>([]);
   const [checking, setChecking] = useState(false);
+  const [clearing, setClearing] = useState(false);
+  const [clearError, setClearError] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
