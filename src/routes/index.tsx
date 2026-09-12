@@ -183,7 +183,7 @@ function Configurator() {
       if (email.trim()) {
         setEmailStatus("Sending confirmation…");
         try {
-          await runSendEmail({
+          const sent = await runSendEmail({
             data: {
               to: email.trim(),
               customer: customer.trim() || "there",
@@ -197,7 +197,11 @@ function Configurator() {
               etaDays: quote.etaDays,
             },
           });
-          setEmailStatus(`Confirmation sent to ${email.trim()}`);
+          setEmailStatus(
+            sent.sent
+              ? `Confirmation sent to ${email.trim()}. Check Inbox, Promotions, or Spam.`
+              : "Confirmation email could not be verified.",
+          );
         } catch (e) {
           setEmailStatus(e instanceof Error ? e.message : "Confirmation email failed.");
         }

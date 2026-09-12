@@ -65,8 +65,11 @@ Estimated arrival in about ${data.etaDays} days.</p>
     const message = [
       `To: ${data.to}`,
       `Subject: ${header(`Order is confirmed — ${data.modelName} (${data.orderId})`)}`,
+      `Message-ID: <${data.orderId.toLowerCase()}@nismo-order.local>`,
+      `X-Order-ID: ${data.orderId}`,
       "MIME-Version: 1.0",
       'Content-Type: text/html; charset="UTF-8"',
+      "Content-Transfer-Encoding: 8bit",
       "",
       html,
     ].join("\r\n");
@@ -89,5 +92,8 @@ Estimated arrival in about ${data.etaDays} days.</p>
       throw new Error(`Confirmation email could not be sent [${res.status}].`);
     }
 
-    return { sent: true as const };
+    const sentMessage = (await res.json()) as { id?: string };
+    if (!sentMessage.id) throw new Error("Gmail did not confirm that the message was sent.");
+
+    return { sent: true as const, messageId: sentMessage.id };
   });
