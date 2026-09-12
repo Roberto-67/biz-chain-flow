@@ -145,10 +145,16 @@ function Configurator() {
   const togglePackage = (id: string) =>
     setPackages((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
 
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
   async function placeOrder() {
     if (mining) return;
     if (!quote?.available) {
       setError("Confirm a delivery location inside the service zone first.");
+      return;
+    }
+    if (!emailValid) {
+      setError("Enter the email address that should receive the confirmation.");
       return;
     }
     setMining(true);
