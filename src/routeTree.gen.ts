@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ErpRouteImport } from './routes/erp'
 import { Route as LedgerRouteImport } from './routes/ledger'
+import { Route as RecordsRouteImport } from './routes/records'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,44 @@ const LedgerRoute = LedgerRouteImport.update({
   path: '/ledger',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecordsRoute = RecordsRouteImport.update({
+  id: '/records',
+  path: '/records',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/erp': typeof ErpRoute
   '/ledger': typeof LedgerRoute
+  '/records': typeof RecordsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/erp': typeof ErpRoute
   '/ledger': typeof LedgerRoute
+  '/records': typeof RecordsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/erp': typeof ErpRoute
   '/ledger': typeof LedgerRoute
+  '/records': typeof RecordsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/erp' | '/ledger'
+  fullPaths: '/' | '/erp' | '/ledger' | '/records'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/erp' | '/ledger'
-  id: '__root__' | '/' | '/erp' | '/ledger'
+  to: '/' | '/erp' | '/ledger' | '/records'
+  id: '__root__' | '/' | '/erp' | '/ledger' | '/records'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ErpRoute: typeof ErpRoute
   LedgerRoute: typeof LedgerRoute
+  RecordsRoute: typeof RecordsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +92,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LedgerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/records': {
+      id: '/records'
+      path: '/records'
+      fullPath: '/records'
+      preLoaderRoute: typeof RecordsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ErpRoute: ErpRoute,
   LedgerRoute: LedgerRoute,
+  RecordsRoute: RecordsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
