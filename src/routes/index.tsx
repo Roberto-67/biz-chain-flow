@@ -145,10 +145,16 @@ function Configurator() {
   const togglePackage = (id: string) =>
     setPackages((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
 
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
   async function placeOrder() {
     if (mining) return;
     if (!quote?.available) {
       setError("Confirm a delivery location inside the service zone first.");
+      return;
+    }
+    if (!emailValid) {
+      setError("Enter the email address that should receive the confirmation.");
       return;
     }
     setMining(true);
@@ -405,6 +411,9 @@ function Configurator() {
               placeholder="buyer@email.com"
               className="mt-2 w-full rounded-md border border-input bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary"
             />
+            <span className="mt-1 block text-xs text-muted-foreground">
+              The confirmation is sent to whichever address you type here.
+            </span>
           </label>
 
           <div className="mt-4 rounded-md border border-border bg-background/40 p-3 text-xs">
@@ -420,17 +429,19 @@ function Configurator() {
 
           <button
             onClick={placeOrder}
-            disabled={mining || !quote?.available}
+            disabled={mining || !quote?.available || !emailValid}
             className="mt-4 w-full rounded-md bg-primary px-4 py-3 font-display text-sm font-bold uppercase tracking-[0.2em] text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
           >
             {mining ? "Mining block…" : "Place order & mine block"}
           </button>
 
-          {!quote?.available && !mining && (
+          {!mining && (!quote?.available || !emailValid) && (
             <p className="mt-2 text-xs text-muted-foreground">
-              {quote
-                ? "That address isn't in the Philippines — try a local address in Step 06."
-                : "Enter your delivery address in Step 06 and tap “Check address” to unlock ordering."}
+              {!quote
+                ? "Enter your delivery address in Step 06 and tap “Check address” to unlock ordering."
+                : !quote.available
+                  ? "That address isn't in the Philippines — try a local address in Step 06."
+                  : "Add the email address that should receive the confirmation."}
             </p>
           )}
 
