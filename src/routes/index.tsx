@@ -429,7 +429,7 @@ function Configurator() {
 
           <button
             onClick={placeOrder}
-            disabled={mining || !quote?.available}
+            disabled={mining || !quote?.available || !emailValid}
             className="mt-4 w-full rounded-md bg-primary px-4 py-3 font-display text-sm font-bold uppercase tracking-[0.2em] text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
           >
             {mining ? "Mining block…" : "Place order & mine block"}
