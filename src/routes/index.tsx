@@ -411,6 +411,9 @@ function Configurator() {
               placeholder="buyer@email.com"
               className="mt-2 w-full rounded-md border border-input bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary"
             />
+            <span className="mt-1 block text-xs text-muted-foreground">
+              The confirmation is sent to whichever address you type here.
+            </span>
           </label>
 
           <div className="mt-4 rounded-md border border-border bg-background/40 p-3 text-xs">
