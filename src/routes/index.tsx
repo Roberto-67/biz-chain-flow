@@ -435,11 +435,13 @@ function Configurator() {
             {mining ? "Mining block…" : "Place order & mine block"}
           </button>
 
-          {!quote?.available && !mining && (
+          {!mining && (!quote?.available || !emailValid) && (
             <p className="mt-2 text-xs text-muted-foreground">
-              {quote
-                ? "That address isn't in the Philippines — try a local address in Step 06."
-                : "Enter your delivery address in Step 06 and tap “Check address” to unlock ordering."}
+              {!quote
+                ? "Enter your delivery address in Step 06 and tap “Check address” to unlock ordering."
+                : !quote.available
+                  ? "That address isn't in the Philippines — try a local address in Step 06."
+                  : "Add the email address that should receive the confirmation."}
             </p>
           )}
 
