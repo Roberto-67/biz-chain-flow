@@ -4,6 +4,7 @@ const links = [
   { to: "/", label: "Configurator" },
   { to: "/erp", label: "ERP Dashboard" },
   { to: "/ledger", label: "Blockchain Ledger" },
+  { to: "/records", label: "Sales Records" },
 ] as const;
 
 export function SiteNav() {
