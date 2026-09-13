@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { refreshChain, useChain, type OrderBlock } from "@/lib/chain";
 import { money } from "@/lib/nismo";
 
@@ -186,8 +186,8 @@ function RecordsPage() {
               </thead>
               <tbody>
                 {rows.map((b) => (
-                  <>
-                    <tr key={b.hash} className="border-b border-border/60">
+                  <Fragment key={b.hash}>
+                    <tr className="border-b border-border/60">
                       <td className="px-5 py-3 text-xs text-muted-foreground">
                         {new Date(b.timestamp).toLocaleString()}
                       </td>
@@ -210,7 +210,7 @@ function RecordsPage() {
                       </td>
                     </tr>
                     {open === b.index && (
-                      <tr key={`${b.hash}-details`} className="border-b border-border/60 bg-background/50">
+                      <tr className="border-b border-border/60 bg-background/50">
                         <td colSpan={6} className="px-5 py-5">
                           <dl className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
                             <div>
@@ -243,7 +243,7 @@ function RecordsPage() {
                         </td>
                       </tr>
                     )}
-                  </>
+                  </Fragment>
                 ))}
               </tbody>
             </table>
