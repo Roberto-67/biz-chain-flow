@@ -7,7 +7,18 @@ import r33 from "@/assets/skyline-r33-nismo.jpg";
 import r32 from "@/assets/skyline-r32-nismo.jpg";
 import s15 from "@/assets/silvia-s15-nismo.jpg";
 
-export type Option = { id: string; label: string; price: number; note?: string };
+export type Option = {
+  id: string;
+  label: string;
+  price: number;
+  note?: string;
+  /** Colour dot shown in the picker */
+  swatch?: string;
+  /** Colour blended over the car photo for the live preview */
+  tint?: string;
+  /** Extra CSS filter applied to the car photo */
+  filter?: string;
+};
 
 export type NismoModel = {
   id: string;
