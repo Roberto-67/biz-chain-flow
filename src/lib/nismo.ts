@@ -2,6 +2,10 @@ import gtr from "@/assets/gtr-nismo.jpg";
 import z from "@/assets/z-nismo.jpg";
 import juke from "@/assets/juke-nismo.jpg";
 import ariya from "@/assets/ariya-nismo.jpg";
+import r34 from "@/assets/skyline-r34-nismo.jpg";
+import r33 from "@/assets/skyline-r33-nismo.jpg";
+import r32 from "@/assets/skyline-r32-nismo.jpg";
+import s15 from "@/assets/silvia-s15-nismo.jpg";
 
 export type Option = { id: string; label: string; price: number; note?: string };
 
