@@ -65,11 +65,20 @@ function OptionRow({
           : "border-border bg-background/40 hover:border-muted-foreground/50"
       }`}
     >
-      <span>
-        <span className="block text-sm font-semibold">{option.label}</span>
-        {option.note ? (
-          <span className="block text-xs text-muted-foreground">{option.note}</span>
+      <span className="flex items-center gap-3">
+        {option.swatch ? (
+          <span
+            aria-hidden
+            className="h-6 w-6 shrink-0 rounded-full border border-foreground/30"
+            style={{ backgroundColor: option.swatch }}
+          />
         ) : null}
+        <span>
+          <span className="block text-sm font-semibold">{option.label}</span>
+          {option.note ? (
+            <span className="block text-xs text-muted-foreground">{option.note}</span>
+          ) : null}
+        </span>
       </span>
       <span className="flex items-center gap-3 whitespace-nowrap text-sm text-muted-foreground">
         {option.price === 0 ? "Included" : `+ ${money(option.price)}`}
