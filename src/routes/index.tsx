@@ -65,11 +65,20 @@ function OptionRow({
           : "border-border bg-background/40 hover:border-muted-foreground/50"
       }`}
     >
-      <span>
-        <span className="block text-sm font-semibold">{option.label}</span>
-        {option.note ? (
-          <span className="block text-xs text-muted-foreground">{option.note}</span>
+      <span className="flex items-center gap-3">
+        {option.swatch ? (
+          <span
+            aria-hidden
+            className="h-6 w-6 shrink-0 rounded-full border border-foreground/30"
+            style={{ backgroundColor: option.swatch }}
+          />
         ) : null}
+        <span>
+          <span className="block text-sm font-semibold">{option.label}</span>
+          {option.note ? (
+            <span className="block text-xs text-muted-foreground">{option.note}</span>
+          ) : null}
+        </span>
       </span>
       <span className="flex items-center gap-3 whitespace-nowrap text-sm text-muted-foreground">
         {option.price === 0 ? "Included" : `+ ${money(option.price)}`}
@@ -136,6 +145,10 @@ function Configurator() {
     ],
     [paint, wheel, interior, packages],
   );
+
+  const paintOpt = PAINTS.find((o) => o.id === paint)!;
+  const wheelOpt = WHEELS.find((o) => o.id === wheel)!;
+  const interiorOpt = INTERIORS.find((o) => o.id === interior)!;
 
   const optionsTotal = chosen.reduce((s, o) => s + o.price, 0);
   const subtotal = model.base + optionsTotal;
@@ -223,13 +236,40 @@ function Configurator() {
               {model.name}
             </h1>
             <p className="mt-3 text-muted-foreground">{model.tagline}</p>
-            <img
-              src={model.image}
-              alt={`${model.name} in studio lighting`}
-              width={1600}
-              height={912}
-              className="mt-6 w-full rounded-lg"
-            />
+            <div className="relative mt-6 overflow-hidden rounded-lg">
+              <img
+                src={model.image}
+                alt={`${model.name} in ${paintOpt.label} with ${wheelOpt.label}`}
+                width={1600}
+                height={912}
+                className="w-full transition-[filter] duration-500"
+                style={{ filter: paintOpt.filter }}
+              />
+              {paintOpt.tint ? (
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 transition-colors duration-500"
+                  style={{ backgroundColor: paintOpt.tint, mixBlendMode: "hue" }}
+                />
+              ) : null}
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-wrap gap-2 bg-gradient-to-t from-background/90 to-transparent p-3">
+                {[paintOpt, wheelOpt, interiorOpt].map((o) => (
+                  <span
+                    key={o.id}
+                    className="flex items-center gap-2 rounded-full border border-border bg-background/80 px-3 py-1 text-xs font-semibold"
+                  >
+                    <span
+                      className="h-3 w-3 rounded-full border border-foreground/30"
+                      style={{ backgroundColor: o.swatch }}
+                    />
+                    {o.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Live preview updates as you change paint, wheels and interior.
+            </p>
             <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
               {[
                 ["Power", model.power],
