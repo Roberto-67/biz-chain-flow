@@ -124,23 +124,56 @@ export const MODELS: NismoModel[] = [
 ];
 
 export const PAINTS: Option[] = [
-  { id: "pearl-white", label: "Brilliant White Pearl", price: 0 },
-  { id: "stealth-black", label: "Stealth Matte Black", price: 275000 },
-  { id: "vibrant-red", label: "NISMO Vibrant Red", price: 185000 },
-  { id: "bayside-blue", label: "Bayside Blue", price: 320000 },
-  { id: "midnight-purple", label: "Midnight Purple III", price: 395000 },
+  {
+    id: "pearl-white",
+    label: "Brilliant White Pearl",
+    price: 0,
+    swatch: "#eef1f4",
+    filter: "saturate(0.18) brightness(1.18) contrast(1.02)",
+  },
+  {
+    id: "stealth-black",
+    label: "Stealth Matte Black",
+    price: 275000,
+    swatch: "#17181a",
+    filter: "saturate(0.12) brightness(0.62) contrast(1.18)",
+  },
+  {
+    id: "vibrant-red",
+    label: "NISMO Vibrant Red",
+    price: 185000,
+    swatch: "#d3172a",
+    tint: "#d3172a",
+    filter: "saturate(1.5) contrast(1.05)",
+  },
+  {
+    id: "bayside-blue",
+    label: "Bayside Blue",
+    price: 320000,
+    swatch: "#1d4ed8",
+    tint: "#1d4ed8",
+    filter: "saturate(1.45) contrast(1.05)",
+  },
+  {
+    id: "midnight-purple",
+    label: "Midnight Purple III",
+    price: 395000,
+    swatch: "#4c1d95",
+    tint: "#5b21b6",
+    filter: "saturate(1.4) brightness(0.92) contrast(1.08)",
+  },
 ];
 
 export const WHEELS: Option[] = [
-  { id: "forged-19", label: '19" RAYS Forged', price: 0 },
-  { id: "forged-20", label: '20" RAYS Forged Black', price: 350000 },
-  { id: "track-20", label: '20" Track Series Bronze', price: 480000 },
+  { id: "forged-19", label: '19" RAYS Forged', price: 0, swatch: "#b9bec4" },
+  { id: "forged-20", label: '20" RAYS Forged Black', price: 350000, swatch: "#1b1c1f" },
+  { id: "track-20", label: '20" Track Series Bronze', price: 480000, swatch: "#a97142" },
 ];
 
 export const INTERIORS: Option[] = [
-  { id: "alcantara", label: "Alcantara / Red Stitch", price: 0 },
-  { id: "recaro", label: "RECARO Carbon Buckets", price: 555000 },
-  { id: "leather", label: "Full Grain Leather", price: 310000 },
+  { id: "alcantara", label: "Alcantara / Red Stitch", price: 0, swatch: "#2a2a2e" },
+  { id: "recaro", label: "RECARO Carbon Buckets", price: 555000, swatch: "#3d3f44" },
+  { id: "leather", label: "Full Grain Leather", price: 310000, swatch: "#6b4a2f" },
 ];
 
 export const PACKAGES: Option[] = [
