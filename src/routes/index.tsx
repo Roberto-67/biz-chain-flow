@@ -137,6 +137,10 @@ function Configurator() {
     [paint, wheel, interior, packages],
   );
 
+  const paintOpt = PAINTS.find((o) => o.id === paint)!;
+  const wheelOpt = WHEELS.find((o) => o.id === wheel)!;
+  const interiorOpt = INTERIORS.find((o) => o.id === interior)!;
+
   const optionsTotal = chosen.reduce((s, o) => s + o.price, 0);
   const subtotal = model.base + optionsTotal;
   const tax = Math.round(subtotal * TAX_RATE);
