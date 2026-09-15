@@ -35,7 +35,7 @@ export const sendOrderConfirmation = createServerFn({ method: "POST" })
     if (!lovableKey || !gmailKey) throw new Error("Email service is not configured yet.");
 
     const money = (n: number) =>
-      n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+      n.toLocaleString("en-PH", { style: "currency", currency: "PHP", maximumFractionDigits: 0 });
 
     const rows = data.options
       .map(
