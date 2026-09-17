@@ -176,7 +176,11 @@ export const checkDelivery = createServerFn({ method: "POST" })
     if (!located) throw new Error("We could not find that address on the map. Add the street number, barangay and city.");
 
     const distanceKm = Math.round(haversineKm(SHOWROOM.lat, SHOWROOM.lng, located.lat, located.lng));
-    const available = /philippines/i.test(located.formattedAddress);
+    // Places results often omit the country in the formatted address, so confirm
+    // by the Philippine coordinate bounds as well.
+    const inPhBounds =
+      located.lat >= 4.2 && located.lat <= 21.6 && located.lng >= 116 && located.lng <= 127.2;
+    const available = /philippines/i.test(located.formattedAddress) || inPhBounds;
     const etaDays = available ? Math.max(3, Math.ceil(distanceKm / 180) + 2) : 0;
 
     const precisionNote =
