@@ -32,7 +32,10 @@ export const sendOrderConfirmation = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const lovableKey = process.env["LOVABLE_API_KEY"];
     const gmailKey = process.env["GOOGLE_MAIL_API_KEY"];
-    if (!lovableKey || !gmailKey) throw new Error("Email service is not configured yet.");
+    if (!lovableKey || !gmailKey)
+      throw new Error(
+        "Email sending is not configured. Set LOVABLE_API_KEY and GOOGLE_MAIL_API_KEY in your .env file (see .env.example) and restart the dev server.",
+      );
 
     const money = (n: number) =>
       n.toLocaleString("en-PH", { style: "currency", currency: "PHP", maximumFractionDigits: 0 });
