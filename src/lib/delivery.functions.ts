@@ -26,7 +26,7 @@ export type DeliveryQuote = {
   etaDays: number;
   message: string;
   /** Google place identifier, used to open the exact pin in Google Maps. */
-  placeId?: string;
+  placeId?: string | undefined;
   /** How exact the pin is: exact rooftop/street entrance, street level, or area only. */
   precision: "exact" | "street" | "approximate";
   precisionNote: string;
@@ -62,7 +62,7 @@ type Located = {
   formattedAddress: string;
   lat: number;
   lng: number;
-  placeId?: string;
+  placeId?: string | undefined;
   precision: DeliveryQuote["precision"];
 };
 
