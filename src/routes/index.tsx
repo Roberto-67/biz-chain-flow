@@ -385,9 +385,14 @@ function Configurator() {
               >
                 <p className="text-sm font-semibold">{quote.formattedAddress}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{quote.message}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {quote.precisionNote} Pin: {quote.lat.toFixed(6)}, {quote.lng.toFixed(6)}
+                </p>
                 <Button asChild variant="outline" className="mt-3 border-primary font-display text-xs font-bold uppercase tracking-[0.2em] text-primary">
                   <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${quote.lat},${quote.lng}`)}`}
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                      `${quote.lat},${quote.lng}`,
+                    )}${quote.placeId ? `&query_place_id=${encodeURIComponent(quote.placeId)}` : ""}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
